@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import search_bar, machine_form, list_options %}
+{% block title %}Veľké stroje{% endblock %}
+
+{% block body %}
+<h2>VEĽKÉ STROJE / ZARIADENIA</h2>
+<img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+<a href="{{ url_for('auth.logout') }}" class="logout">ODHLÁSIŤ</a>
+
+<a href="{{ url_for('big.archive') }}"      class="nav-link block">ZOBRAZIŤ VYRADENÉ VEĽKÉ STROJE / ZARIADENIA</a>
+<a href="{{ url_for('big.temp_archive') }}" class="nav-link block">ZOBRAZIŤ DOČASNE VYRADENÉ VEĽKÉ STROJE / ZARIADENIA</a>
+<a href="{{ url_for('main.evidency') }}"     class="nav-link block">SPÄŤ</a>
+
+{{ machine_form(url_for('big.add_machine'), check_permission, user_role, require_revision_date=False) }}
+{{ search_bar() }}
+
+<table>
+    <thead>
+        <tr>
+            <th>REGISTRAČNÉ / INVENTÁRNE ČÍSLO</th>
+            <th>NÁZOV ZARIADENIA</th>
+            <th>DÁTUM REVÍZIE</th>
+            <th>INTERVAL REVÍZIE (mesiace)</th>
+            <th>PLATNOSŤ REVÍZIE</th>
+            <th>ČÍSLO PROTOKOLU</th>
+            <th>TYP</th>
+            <th>VÝROBNÉ ČÍSLO</th>
+            <th>VÝROBCA</th>
+            <th>LOKÁCIA</th>
+            <th>VLASTNÍK</th>
+            <th>PRIJATÉ</th>
+            <th>POZNÁMKA</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for machine in machines %}
+        <tr>
+            <td class="machine-id">{{ machine['registration_number'] }}</td>
+            <td class="machine-name">{{ machine['name'] }}</td>
+            {% if check_permission('edit', user_role) %}
+                <td class="revision-button">{{ machine['revision_date'] }}</td>
+            {% else %}
+                <td>{{ machine['revision_date'] }}</td>
+            {% endif %}
+            <td>{{ machine['revision_periodicity'] }}</td>
+            <td class="{% if machine['next_maintenance_overdue'] %}overdue{% elif machine['next_maintenance_soon'] %}soon{% elif machine['add_revision_date'] %}add_rev_date{% endif %}">
+                {{ machine['next_maintenance_date'] if machine['next_maintenance_date'] else '– doplňte dátum –' }}
+            </td>
+            <td>{{ machine['protocol'] }}</td>
+            <td>{{ machine['type'] }}</td>
+            <td>{{ machine['manufacturing_number'] }}</td>
+            <td>{{ machine['manufacturer'] }}</td>
+            <td>{{ machine['location'] }}</td>
+            <td>{{ machine['owner'] }}</td>
+            <td>{{ machine['registration_date'] }}</td>
+            <td>{{ machine['note'] }}</td>
+            {{ list_options(machine, url_for('big.edit_machine', machine_id=machine['registration_number']), check_permission, user_role) }}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div id="myModal" class="modal"><div class="modal-content"></div></div>
+{% endblock %}
+
+{% block page_js %}
+initRevisionModal('/edit_date_big_machine/');
+initActionButtons({
+    remove:       { msg: 'Vymazať stroj?',            url: '/remove_machine_big' },
+    archive:      { msg: 'Naozaj vyradiť?',           url: '/archive_machine_big/' },
+    temp_archive: { msg: 'Naozaj dočasne vyradiť?',  url: '/temp_archive_machine_big/' }
+});
+{% endblock %}

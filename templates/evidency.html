@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Evidencia Strojov{% endblock %}
+
+{% block extra_css %}
+body { background-color: #f0f0f0; }
+.dashboard {
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+}
+.dashboard .logo { max-width: 440px; margin-bottom: 30px; }
+.dash-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    margin: 8px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+.dash-btn:hover { background-color: #0056b3; }
+.dash-btn.excel { background-color: #ce8b26; }
+.dash-btn.excel:hover { background-color: #a56d1a; }
+{% endblock %}
+
+{% block body %}
+<h2>EVIDENCIA STROJOV A ZARIADENÍ</h2>
+<a href="{{ url_for('auth.logout') }}" class="logout">ODHLÁSIŤ</a>
+
+<div class="dashboard">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+
+    <div>
+        <a href="{{ url_for('small.list_machines') }}" class="dash-btn">MALÉ ZARIADENIA</a>
+        <a href="{{ url_for('big.list_machines') }}"   class="dash-btn">VEĽKÉ ZARIADENIA</a>
+    </div>
+
+    {% if check_permission('remove', user_role) %}
+    <div>
+        <a href="{{ url_for('main.create_excel_file') }}" class="dash-btn excel">VYTVORIŤ SÚBOR</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

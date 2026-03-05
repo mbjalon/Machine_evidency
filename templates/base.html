@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Evidencia Strojov{% endblock %}</title>
+    <style>
+        /* ── Reset & Base ───────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ddd;
+            margin: 0;
+            padding: 0;
+        }
+        h2 { text-align: center; color: #333; }
+
+        /* ── Logo ───────────────────────────────────────────────── */
+        .logo {
+            display: block;
+            margin: 16px auto;
+            max-width: 200px;
+        }
+
+        /* ── Navigation links ───────────────────────────────────── */
+        .nav-link {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 4px;
+            text-decoration: none;
+            background-color: #537285;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover { background-color: #3d5666; }
+        .nav-link.block { display: block; margin-left: 50px; margin-top: 10px; width: fit-content; }
+        .nav-link.back { margin: 10px 0 20px 20px; }
+        .nav-link.danger { background-color: #dc3545; }
+        .nav-link.danger:hover { background-color: #a71d2a; }
+        .logout {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 10px;
+            text-decoration: none;
+            background-color: #b14545;
+            color: #e4e4e4;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .logout:hover { background-color: #8a2f2f; }
+
+        /* ── Flash messages ─────────────────────────────────────── */
+        .flash-container {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .flash {
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: auto;
+            white-space: nowrap;
+        }
+        .flash-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash-error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flash-info    { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        /* ── Add-machine form ───────────────────────────────────── */
+        .add-form {
+            margin: 20px 0;
+            padding: 10px 0;
+            background-color: #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .add-form label { display: block; margin: 0 0 2px 100px; }
+        .add-form input, .add-form button {
+            width: 20%;
+            padding: 10px;
+            margin: 0 0 12px 100px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .add-form button {
+            background-color: #007623;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            width: auto;
+            margin-left: 100px;
+            display: block;
+        }
+        .add-form button:hover { background-color: #005a1a; }
+
+        /* ── Search bar ─────────────────────────────────────────── */
+        #searchForm { margin: 16px 0; text-align: center; }
+        #search {
+            width: 200px; padding: 10px;
+            border: 1px solid #ccc; border-radius: 5px;
+            font-size: 16px; margin-right: 5px;
+        }
+        #searchButton {
+            padding: 8px 14px;
+            background-color: #616161;
+            color: #fff;
+            border: none; border-radius: 5px;
+            font-size: 14px; cursor: pointer;
+        }
+        #searchButton:hover { background-color: #005a1a; }
+
+        /* ── Table ──────────────────────────────────────────────── */
+        table {
+            border-collapse: collapse;
+            width: 97%;
+            margin: 0 auto 100px;
+            font-size: smaller;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 2px solid #656565;
+            text-align: center;
+            padding: 10px;
+            word-break: break-word;
+        }
+        th { background-color: #47598f; color: #fff; }
+        tr.overdue td      { background-color: #ff6b6b; }
+        tr.soon td         { background-color: #fff176; }
+        tr.add-rev-date td { background-color: #64b5f6; }
+        td.overdue         { background-color: red;    font-weight: bold; }
+        td.soon            { background-color: yellow; font-weight: bold; }
+        td.add_rev_date    { background-color: rgb(0,136,255); font-weight: bold; }
+
+        /* ── Options dropdown ───────────────────────────────────── */
+        .edit-buttons { text-align: center; position: relative; }
+        .options-button {
+            padding: 4px 10px;
+            background-color: #537285;
+            color: #fff;
+            border: none; border-radius: 4px;
+            cursor: pointer;
+        }
+        .options-button:hover { background-color: #3d5666; }
+        .floating-window {
+            display: none;
+            position: absolute;
+            right: 0; z-index: 10;
+            background-color: #fff;
+            border: 1px solid #47598f;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            white-space: nowrap;
+        }
+        .action-btn {
+            display: block;
+            padding: 4px 10px;
+            margin: 2px 0;
+            text-decoration: none;
+            background-color: #537285;
+            color: #fff;
+            border: none; border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .action-btn:hover  { background-color: #3d5666; }
+        .action-btn.remove { background-color: #dc3545; }
+        .action-btn.remove:hover { background-color: #a71d2a; }
+
+        /* ── Revision date click-to-edit ────────────────────────── */
+        .revision-button {
+            background-color: #b6b6b6;
+            cursor: pointer;
+        }
+        .revision-button:hover { background-color: #47598f; color: #fff; }
+
+        /* ── Modal ──────────────────────────────────────────────── */
+        .modal {
+            display: none;
+            position: fixed; inset: 0; z-index: 100;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 12% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: min(400px, 90%);
+            border-radius: 6px;
+        }
+        .modal-content .close {
+            float: right;
+            font-size: 26px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        .modal-content .close:hover { color: #000; }
+        .modal-content label { display: block; margin-bottom: 6px; font-weight: bold; }
+        .modal-content input[type="date"] {
+            width: 100%; padding: 8px;
+            border: 1px solid #ccc; border-radius: 4px;
+            margin-bottom: 14px;
+        }
+        .modal-content button {
+            padding: 8px 18px;
+            background-color: #007bff;
+            color: #fff;
+            border: none; border-radius: 4px; cursor: pointer;
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        <script>
+            document.querySelectorAll('.flash').forEach(function(el) {
+                setTimeout(function() {
+                    el.style.opacity = '0';
+                    setTimeout(function() { el.remove(); }, 500);
+                }, 3000);
+            });
+        </script>
+    {% endif %}
+{% endwith %}
+
+{% block body %}{% endblock %}
+
+<!-- ── Shared JS ──────────────────────────────────────────────── -->
+<script>
+    // Search with diacritic stripping
+    function removeDiacritics(text) {
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function initSearch() {
+        var searchInput  = document.getElementById('search');
+        var searchButton = document.getElementById('searchButton');
+        if (!searchInput) return;
+
+        function performSearch(q) {
+            q = removeDiacritics((q !== undefined ? q : searchInput.value).trim().toLowerCase());
+            document.querySelectorAll('tbody tr').forEach(function(row) {
+                var text = removeDiacritics(row.textContent.toLowerCase());
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        }
+
+        function saveAndSearch() {
+            var q = searchInput.value.trim();
+            var url = new URL(window.location);
+            if (q) {
+                url.searchParams.set('q', q);
+            } else {
+                url.searchParams.delete('q');
+            }
+            window.history.replaceState({}, '', url);
+            performSearch(q);
+        }
+
+        searchButton.addEventListener('click', saveAndSearch);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); saveAndSearch(); }
+        });
+
+        // Restore search from URL on page load
+        var params = new URLSearchParams(window.location.search);
+        var saved = params.get('q');
+        if (saved) {
+            searchInput.value = saved;
+            performSearch(saved);
+        }
+    }
+
+    // Options dropdown toggle (close others on open)
+    function initDropdowns() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.options-button');
+            document.querySelectorAll('.floating-window').forEach(function(fw) {
+                fw.style.display = 'none';
+            });
+            if (btn) {
+                var fw = btn.nextElementSibling;
+                if (fw) fw.style.display = 'block';
+            }
+        });
+    }
+
+    // Revision date modal
+    function initRevisionModal(editUrlBase) {
+        var modal = document.getElementById('myModal');
+        if (!modal) return;
+
+        document.querySelectorAll('.revision-button').forEach(function(cell) {
+            cell.addEventListener('click', function() {
+                var row       = this.closest('tr');
+                var machineId = row.querySelector('.machine-id').textContent.trim();
+                var name      = row.querySelector('.machine-name').textContent.trim();
+                var date      = this.textContent.trim();
+
+                document.querySelector('.modal-content').innerHTML =
+                    '<span class="close">&times;</span>' +
+                    '<p><strong>Registračné číslo:</strong> ' + machineId + '</p>' +
+                    '<p><strong>Názov:</strong> ' + name + '</p>' +
+                    '<form id="editDateForm" method="post" action="' + editUrlBase + machineId + (new URLSearchParams(window.location.search).get('q') ? '?q=' + encodeURIComponent(new URLSearchParams(window.location.search).get('q')) : '') + '">' +
+                    '<label for="new_date">Nový dátum revízie</label>' +
+                    '<input type="date" id="new_date" name="new_date" value="' + date + '" required>' +
+                    '<button type="submit">Zmeniť</button>' +
+                    '</form>';
+
+                document.querySelector('.modal-content .close').addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                modal.style.display = 'block';
+            });
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+    }
+
+    // Confirm-before-navigate for action buttons
+    function initActionButtons(actions) {
+        // actions: [{cls, msg, urlFn}]
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            var action = actions[btn.dataset.action];
+            if (!action) return;
+            e.preventDefault();
+            if (confirm(action.msg)) {
+                var q = new URLSearchParams(window.location.search).get('q');
+                var url = action.url + btn.dataset.id;
+                if (q) url += (url.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(q);
+                window.location.href = url;
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initSearch();
+        initDropdowns();
+
+        // Append current ?q= to UPRAVIŤ links so search survives the round-trip
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('.edit-link');
+            if (!link) return;
+            var q = new URLSearchParams(window.location.search).get('q');
+            if (q) {
+                e.preventDefault();
+                var sep = link.href.includes('?') ? '&' : '?';
+                window.location.href = link.href + sep + 'q=' + encodeURIComponent(q);
+            }
+        });
+
+        {% block page_js %}{% endblock %}
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

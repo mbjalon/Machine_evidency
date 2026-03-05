@@ -1,0 +1,159 @@
+{# ── macros.html ────────────────────────────────────────────────────────
+   Import with:
+       {% from 'macros.html' import machine_form, archive_table_row,
+                                     machine_table_row, search_bar %}
+   ──────────────────────────────────────────────────────────────────── #}
+
+
+{# Search bar widget #}
+{% macro search_bar() %}
+    <form id="searchForm">
+        <input type="text" id="search" name="search" placeholder="Hľadať...">
+        <button type="button" id="searchButton">Hľadať</button>
+    </form>
+{% endmacro %}
+
+
+{# Add-machine form used on both list pages.
+   action_url  – url_for(...) for the POST target
+   require_revision_date – set False for big machines (optional field) #}
+{% macro machine_form(action_url, check_permission, user_role, require_revision_date=True) %}
+    {% if check_permission('edit', user_role) %}
+        <form class="add-form" action="{{ action_url }}" method="post">
+            <label for="registration_number">Registračné/inventárne číslo:</label>
+            <input type="text" id="registration_number" name="registration_number" required>
+
+            <label for="name">Názov zariadenia:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="revision_date">Dátum revízie:</label>
+            <input type="date" id="revision_date" name="revision_date" {{ 'required' if require_revision_date }}>
+
+            <label for="revision_periodicity">Interval revízie (mesiace):</label>
+            <input type="number" id="revision_periodicity" name="revision_periodicity" required>
+
+            <label for="type">Typ:</label>
+            <input type="text" id="type" name="type" required>
+
+            <label for="protocol">Číslo protokolu:</label>
+            <input type="text" id="protocol" name="protocol" required>
+
+            <label for="manufacturing_number">Výrobné číslo:</label>
+            <input type="text" id="manufacturing_number" name="manufacturing_number" required>
+
+            <label for="manufacturer">Výrobca:</label>
+            <input type="text" id="manufacturer" name="manufacturer" required>
+
+            <label for="location">Lokácia:</label>
+            <input type="text" id="location" name="location" required>
+
+            <label for="owner">Vlastník:</label>
+            <input type="text" id="owner" name="owner" required>
+
+            <label for="registration_date">Prijaté:</label>
+            <input type="date" id="registration_date" name="registration_date" required>
+
+            <label for="note">Poznámka:</label>
+            <input type="text" id="note" name="note" required>
+
+            <button type="submit">Pridať zariadenie</button>
+        </form>
+    {% endif %}
+{% endmacro %}
+
+
+{# Options dropdown cell for archive pages (restore + remove) #}
+{% macro archive_options(machine, remove_url_prefix, restore_url_prefix, check_permission, user_role) %}
+    <td class="edit-buttons">
+        <button class="options-button">MOŽNOSTI</button>
+        <div class="floating-window">
+            {% if check_permission('remove', user_role) %}
+                <a href="#"
+                   class="action-btn remove"
+                   data-action="remove"
+                   data-id="{{ machine['registration_number'] }}">VYMAZAŤ</a>
+            {% endif %}
+            {% if restore_url_prefix and check_permission('edit', user_role) %}
+                <a href="#"
+                   class="action-btn"
+                   data-action="restore"
+                   data-id="{{ machine['registration_number'] }}">VRÁTIŤ SPÄŤ</a>
+            {% endif %}
+        </div>
+    </td>
+{% endmacro %}
+
+
+{# Options dropdown cell for main list pages #}
+{% macro list_options(machine, edit_url, check_permission, user_role) %}
+    <td class="edit-buttons">
+        <button class="options-button">MOŽNOSTI</button>
+        <div class="floating-window">
+            {% if check_permission('edit', user_role) %}
+                <a href="{{ edit_url }}" class="action-btn edit-link">UPRAVIŤ</a>
+            {% endif %}
+            {% if check_permission('remove', user_role) %}
+                <a href="#" class="action-btn remove" data-action="remove" data-id="{{ machine['registration_number'] }}">VYMAZAŤ</a>
+            {% endif %}
+            {% if check_permission('edit', user_role) %}
+                <a href="#" class="action-btn" data-action="archive" data-id="{{ machine['registration_number'] }}">VYRADIŤ</a>
+                <a href="#" class="action-btn" data-action="temp_archive" data-id="{{ machine['registration_number'] }}">DOČASNE VYRADIŤ</a>
+            {% endif %}
+        </div>
+    </td>
+{% endmacro %}
+
+
+{# Edit form shared between edit_machine_small and edit_machine_big #}
+{% macro edit_form(machine_id, action_url, back_url, check_permission, user_role) %}
+    <div class="container">
+        <h2>EDITOR</h2>
+        <h3>Registračné číslo: {{ machine_id }}</h3>
+        <form action="{{ action_url }}" method="post">
+            {% if check_permission('remove', user_role) %}
+                <label for="new_reg_num">NOVÉ REGISTRAČNÉ/EVIDENČNÉ ČÍSLO:</label>
+                <input type="text" id="new_reg_num" name="new_reg_num">
+
+                <label for="new_name">NOVÝ NÁZOV:</label>
+                <input type="text" id="new_name" name="new_name">
+            {% endif %}
+
+            <label for="new_revision_date">NOVÝ DÁTUM REVÍZIE:</label>
+            <input type="date" id="new_revision_date" name="new_revision_date">
+
+            <label for="new_periodicity">NOVÝ INTERVAL REVÍZIE:</label>
+            <input type="number" id="new_periodicity" name="new_periodicity">
+
+            {% if check_permission('remove', user_role) %}
+                <label for="new_protocol">NOVÉ ČÍSLO PROTOKOLU:</label>
+                <input type="text" id="new_protocol" name="new_protocol">
+
+                <label for="new_type">NOVÝ TYP:</label>
+                <input type="text" id="new_type" name="new_type">
+
+                <label for="new_man_num">NOVÉ VÝROBNÉ ČÍSLO:</label>
+                <input type="text" id="new_man_num" name="new_man_num">
+
+                <label for="new_man">NOVÝ VÝROBCA:</label>
+                <input type="text" id="new_man" name="new_man">
+            {% endif %}
+
+            <label for="new_location">NOVÁ LOKÁCIA:</label>
+            <input type="text" id="new_location" name="new_location">
+
+            {% if check_permission('remove', user_role) %}
+                <label for="new_owner">NOVÝ VLASTNÍK:</label>
+                <input type="text" id="new_owner" name="new_owner">
+
+                <label for="new_reg_date">NOVÝ DÁTUM REGISTRÁCIE:</label>
+                <input type="date" id="new_reg_date" name="new_reg_date">
+            {% endif %}
+
+            <label for="new_note">NOVÁ POZNÁMKA:</label>
+            <input type="text" id="new_note" name="new_note">
+
+            <button type="submit">Upraviť</button>
+        </form>
+        <a href="{{ back_url }}">SPÄŤ DO EVIDENCIE</a>
+    </div>
+{% endmacro %}

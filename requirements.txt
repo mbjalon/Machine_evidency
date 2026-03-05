@@ -1,0 +1,7 @@
+Flask
+pandas
+flask_apscheduler
+openpyxl
+xlsxwriter
+waitress
+python-dotenv

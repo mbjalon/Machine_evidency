@@ -1,0 +1,73 @@
+{# archive_base.html – extended by all four archive pages.
+   Required variables passed via the child template's set blocks:
+     page_title, back_url, show_revision_date, remove_url_prefix, restore_url_prefix
+#}
+{% extends 'base.html' %}
+{% from 'macros.html' import search_bar %}
+
+{% block body %}
+<h2>{{ page_title }}</h2>
+<a href="{{ back_url }}" class="nav-link back">SPÄŤ DO EVIDENCIE</a>
+
+{{ search_bar() }}
+
+<table>
+    <thead>
+        <tr>
+            <th>REGISTRAČNÉ / INVENTÁRNE ČÍSLO</th>
+            <th>NÁZOV ZARIADENIA</th>
+            {% if show_revision_date %}<th>DÁTUM REVÍZIE</th>{% endif %}
+            <th>INTERVAL REVÍZIE (mesiace)</th>
+            <th>ČÍSLO PROTOKOLU</th>
+            <th>TYP</th>
+            <th>VÝROBNÉ ČÍSLO</th>
+            <th>VÝROBCA</th>
+            <th>LOKÁCIA</th>
+            <th>VLASTNÍK</th>
+            <th>PRIJATÉ</th>
+            <th>POZNÁMKA</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for machine in machines %}
+        <tr>
+            <td>{{ machine['registration_number'] }}</td>
+            <td>{{ machine['name'] }}</td>
+            {% if show_revision_date %}<td>{{ machine['revision_date'] }}</td>{% endif %}
+            <td>{{ machine['revision_periodicity'] }}</td>
+            <td>{{ machine['protocol'] }}</td>
+            <td>{{ machine['type'] }}</td>
+            <td>{{ machine['manufacturing_number'] }}</td>
+            <td>{{ machine['manufacturer'] }}</td>
+            <td>{{ machine['location'] }}</td>
+            <td>{{ machine['owner'] }}</td>
+            <td>{{ machine['registration_date'] }}</td>
+            <td>{{ machine['note'] }}</td>
+            <td class="edit-buttons">
+                <button class="options-button">MOŽNOSTI</button>
+                <div class="floating-window">
+                    {% if check_permission('remove', user_role) %}
+                        <a href="#" class="action-btn remove"
+                           data-action="remove"
+                           data-id="{{ machine['registration_number'] }}">VYMAZAŤ</a>
+                    {% endif %}
+                    {% if restore_url_prefix and check_permission('edit', user_role) %}
+                        <a href="#" class="action-btn"
+                           data-action="restore"
+                           data-id="{{ machine['registration_number'] }}">VRÁTIŤ SPÄŤ</a>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block page_js %}
+initActionButtons({
+    remove:  { msg: 'Vymazať stroj?',                   url: '{{ remove_url_prefix }}'  },
+    restore: { msg: 'Naozaj vrátiť späť do evidencie?', url: '{{ restore_url_prefix }}' }
+});
+{% endblock %}
