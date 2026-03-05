@@ -1,8 +1,9 @@
 import os
 from datetime import timedelta
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent / '.env')
 
 # --- Secrets (loaded from .env) ---
 SECRET_KEY = os.environ['SECRET_KEY']
