@@ -11,7 +11,7 @@ EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 EMAIL_SENDER = os.environ['EMAIL_SENDER']
 EMAIL_USERNAME = os.environ['EMAIL_USERNAME']
 EMAIL_RECEIVERS = os.environ['EMAIL_RECEIVERS'].split(',')
-EXCEL_OUTPUT_DIR = os.environ['EXCEL_OUTPUT_DIR']
+EXCEL_OUTPUT_DIR = os.environ.get('EXCEL_OUTPUT_DIR', r'S:\VYR\Údržba\3 REGISTER STROJOV A ZARIADENÍ')
 
 # --- Non-secret config ---
 DATABASE = 'machine_evidency.db'
