@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import pandas as pd
+from typing import Optional, List, Tuple
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
@@ -43,7 +44,7 @@ def _load_and_rename(table: str, add_validation: bool) -> pd.DataFrame:
     return df.rename(columns=config.COLUMN_RENAME_MAP)
 
 
-def _write_excel(file_name: str, sheets: list[tuple[str, str, bool]]) -> None:
+def _write_excel(file_name: str, sheets: List[Tuple[str, str, bool]]) -> None:
     """Write all sheets to an Excel file and apply colour-coding."""
     writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
     for table, sheet_name, add_validation in sheets:
@@ -82,7 +83,7 @@ def _apply_validation_colours(file_name: str) -> None:
 # Public API
 # ---------------------------------------------------------------------------
 
-def export_to_excel(output_path: str | None = None) -> str:
+def export_to_excel(output_path: Optional[str] = None) -> str:
     """Export all machine tables to an Excel file and return the file path."""
     day_name = datetime.now().strftime('%A')
     file_name = output_path or (

@@ -1,7 +1,8 @@
-Flask
-pandas
-flask_apscheduler
-openpyxl
-xlsxwriter
-waitress
-python-dotenv
+flask==3.0.3
+waitress==3.0.0
+apscheduler==3.10.4
+pandas==2.0.3
+openpyxl==3.1.5
+xlsxwriter==3.2.9
+python-dateutil==2.9.0
+python-dotenv==1.0.1

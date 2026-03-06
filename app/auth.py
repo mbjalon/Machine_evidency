@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Optional
 from flask import session, flash, redirect, url_for
 
 
@@ -26,7 +27,7 @@ USERS = [
 ]
 
 
-def authenticate_user(username: str, password: str) -> User | None:
+def authenticate_user(username: str, password: str) -> Optional[User]:
     """Return the matching User or None if credentials are invalid."""
     return next(
         (u for u in USERS if u.username == username and u.password == password),

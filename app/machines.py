@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from typing import Optional, Tuple
 
 
-def parse_revision_date(date_str: str) -> datetime | None:
+def parse_revision_date(date_str: str) -> Optional[datetime]:
     """Try to parse a revision date string in either of the two expected formats."""
     for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
         try:
@@ -12,7 +13,7 @@ def parse_revision_date(date_str: str) -> datetime | None:
     return None
 
 
-def calculate_validation(machine: dict) -> datetime | None:
+def calculate_validation(machine: dict) -> Optional[datetime]:
     """Return the next validation deadline for a machine dict."""
     revision_date = parse_revision_date(str(machine['revision_date']))
     if revision_date is None:
@@ -39,7 +40,7 @@ def enrich_machine(machine: dict) -> dict:
     return machine
 
 
-def build_update_query(table: str, fields: dict, where_column: str) -> tuple[str, list]:
+def build_update_query(table: str, fields: dict, where_column: str) -> Tuple[str, list]:
     """
     Build a parameterised UPDATE statement from a dict of {column: value}.
     Only non-empty values are included.
