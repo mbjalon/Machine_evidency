@@ -10,7 +10,7 @@ def get_db():
     return g.db
 
 
-def query_to_dicts(cursor) -> list[dict]:
+def query_to_dicts(cursor) -> List[dict]:
     """Convert a cursor result to a list of dicts."""
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
