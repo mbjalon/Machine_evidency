@@ -1,4 +1,6 @@
 import sqlite3
+from typing import List
+
 import pandas as pd
 from flask import g, current_app
 
