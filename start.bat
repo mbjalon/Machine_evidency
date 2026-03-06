@@ -16,3 +16,5 @@ venv\Scripts\pip install -r requirements.txt
 REM Run the app
 echo Starting application...
 venv\Scripts\python run.py
+
+pause
